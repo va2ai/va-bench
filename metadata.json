@@ -1,0 +1,6 @@
+{
+  "name": "VA Legal Intelligence Portal",
+  "description": "An interactive agent pack of 20 VA-specific legal-tech agents for ratings deconstruction, decision normalizations, rating math, evidence gap checklists, and claimant framing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
