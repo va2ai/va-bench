@@ -485,7 +485,7 @@ export default function Playground({
                     {errorMessage}
                   </p>
                   <p className="text-[11px] text-slate-500 mt-4 leading-relaxed font-sans">
-                    🔑 If this is a key configuration error, verify your secret is initialized. Go to <strong>Settings &gt; Secrets</strong> in the AI Studio editor sidebar.
+                    🔑 If this is a key configuration error, verify <code>GEMINI_API_KEY</code> is set in your <strong>.env</strong> file (see <code>.env.example</code>).
                   </p>
                   <button
                     onClick={handleRunAgent}

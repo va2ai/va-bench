@@ -1,7 +1,9 @@
 {
-  "name": "react-example",
+  "name": "va-bench",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "20-agent prompt catalog for VA legal-research support with citation validation and red-team gating.",
+  "license": "Apache-2.0",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",

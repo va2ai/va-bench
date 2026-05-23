@@ -15,13 +15,13 @@ const PORT = 3000;
 function getGeminiClient(): GoogleGenAI {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not defined. Please add it via the Settings > Secrets tab in Google AI Studio.");
+    throw new Error("GEMINI_API_KEY is not defined. Set it in your .env file (see .env.example).");
   }
   return new GoogleGenAI({
     apiKey: apiKey,
     httpOptions: {
       headers: {
-        "User-Agent": "aistudio-build",
+        "User-Agent": "va-bench",
       },
     },
   });
