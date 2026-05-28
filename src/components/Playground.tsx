@@ -40,8 +40,6 @@ export default function Playground({
   const [useProModel, setUseProModel] = useState(false);
   const [isPromptExpanded, setIsPromptExpanded] = useState(false);
   const [executionState, setExecutionState] = useState<"idle" | "running" | "success" | "error">("idle");
-  const [statusMessage, setStatusMessage] = useState("");
-  const [simulatedLogs, setSimulatedLogs] = useState<string[]>([]);
   const [resultText, setResultText] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [copiedText, setCopiedText] = useState(false);
@@ -74,33 +72,6 @@ export default function Playground({
     setExecutionState("idle");
   };
 
-  // Simulated professional log runner to show actual analytical depth (no fake larping)
-  const runSimulatedLogs = (onComplete: () => void) => {
-    const logs = [
-      `[Intake] Reading legal-tech input context (${inputText.length} bytes)...`,
-      `[Compiler] Securing active System Prompt for '${currentAgent.name}'...`,
-      `[Engine] Initiating full-stack proxy route with GenAI pipeline...`,
-      `[Model] Dispatching to secure backend with low-temperature focus...`,
-      `[Validator] Structuring final legal intelligence breakdown...`
-    ];
-
-    setSimulatedLogs([]);
-    let currentIdx = 0;
-
-    const interval = setInterval(() => {
-      if (currentIdx < logs.length) {
-        setSimulatedLogs(prev => [...prev, logs[currentIdx]]);
-        setStatusMessage(logs[currentIdx]);
-        currentIdx++;
-      } else {
-        clearInterval(interval);
-        onComplete();
-      }
-    }, 600);
-
-    return () => clearInterval(interval);
-  };
-
   const handleRunAgent = async () => {
     if (!inputText.trim()) {
       alert("Please provide some narrative input text for the agent to analyze.");
@@ -111,38 +82,36 @@ export default function Playground({
     setResultText("");
     setErrorMessage("");
 
-    runSimulatedLogs(async () => {
-      try {
-        const response = await fetch("/api/run-agent", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            agentId: currentAgent.id,
-            agentName: currentAgent.name,
-            systemPrompt: activePrompt,
-            inputText: inputText,
-            useProModel: useProModel
-          })
-        });
+    try {
+      const response = await fetch("/api/run-agent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          agentId: currentAgent.id,
+          agentName: currentAgent.name,
+          systemPrompt: activePrompt,
+          inputText: inputText,
+          useProModel: useProModel
+        })
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || "Failed to process the request on server.");
-        }
-
-        setResultText(data.outputText || "");
-        setExecutionState("success");
-      } catch (err: any) {
-        console.error("Playground Run Error:", err);
-        setErrorMessage(
-          err.message || "An unexpected error occurred while communicating with the server."
-        );
-        setExecutionState("error");
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to process the request on server.");
       }
-    });
+
+      setResultText(data.outputText || "");
+      setExecutionState("success");
+    } catch (err: any) {
+      console.error("Playground Run Error:", err);
+      setErrorMessage(
+        err.message || "An unexpected error occurred while communicating with the server."
+      );
+      setExecutionState("error");
+    }
   };
 
   const handleCopyResult = async () => {
@@ -445,32 +414,15 @@ export default function Playground({
                 </div>
               )}
 
-              {/* LOADING LOGS COMPONENT */}
+              {/* LOADING STATE */}
               {executionState === "running" && (
-                <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full p-4">
-                  <p className="text-xs text-slate-600 font-bold mb-4 flex items-center gap-1.5">
-                    <Cpu className="w-4 h-4 text-indigo-500 animate-spin" />
-                    Executing Agent Multi-Run Chain...
+                <div className="flex-1 flex flex-col items-center justify-center max-w-sm mx-auto w-full p-4">
+                  <Cpu className="w-8 h-8 text-indigo-500 animate-spin mb-3" />
+                  <p className="text-xs text-slate-700 font-semibold">
+                    Calling {useProModel ? "gemini-2.5-pro" : "gemini-2.5-flash"}...
                   </p>
-                  
-                  {/* Live Simulation Steps feedback */}
-                  <div className="space-y-2 bg-slate-50 border border-slate-200 rounded-xl p-4 font-mono text-[10px] text-slate-600">
-                    {simulatedLogs.map((log, index) => (
-                      <div key={index} className="flex items-start gap-1.5 fade-in">
-                        <span className="text-emerald-500">✓</span>
-                        <span className="leading-normal">{log}</span>
-                      </div>
-                    ))}
-                    {simulatedLogs.length < 5 && (
-                      <div className="flex items-center gap-1.5 animate-pulse text-[#475569]">
-                        <span className="text-[#475569] shrink-0">⌛</span>
-                        <span>Compiling next network log...</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <p className="text-[11px] text-[#64748b] italic mt-4 text-center">
-                    Note: Generative analyses against VA CFR titles may take 2-4 seconds. Thank you for your patience.
+                  <p className="text-[11px] text-slate-500 italic mt-2 text-center">
+                    Typically 2–8 seconds depending on input length and model.
                   </p>
                 </div>
               )}
