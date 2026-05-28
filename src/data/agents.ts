@@ -10,7 +10,7 @@ export const AGENTS_LIST: Agent[] = [
     definition: "Classifies user requests, identifies correct benefits pathways, and extracts crucial case parameters to route to specialized downstream teams.",
     inputLabel: "Incoming Request Narrative / Case Text",
     inputPlaceholder: "Example: 'I was denied service connection for PTSD. My decision is dated March 12, 2026. I have a new buddy statement from my sergeant...'",
-    sampleInput: `Dear Advocate,
+    sampleInput: `Hello,
 I am looking for help with my VA claim. I received a rating decision dated April 10, 2026, denying me service connection for Obstructive Sleep Apnea.
 The rater accepted that I have sleep apnea and that I served in Iraq, but they said there is no connection between my military service and my sleep apnea.
 My appeal period is still active. I have a private nexus letter from my sleep doctor that says my sleep apnea was aggravated by my service-connected PTSD and the medications I take for it. Should I file a Higher-Level Review or a Supplemental Claim with this new doctor's letter?`,
@@ -1462,9 +1462,9 @@ Return:
 }`
   },
   {
-    id: "va-claimant-framing-advocate",
-    name: "VA Claimant Framing Advocate",
-    suggestedFile: "src/agents/prompts/va-claimant-framing-advocate.ts",
+    id: "va-claimant-favorable-framer",
+    name: "VA Claimant Favorable Framer",
+    suggestedFile: "src/agents/prompts/va-claimant-favorable-framer.ts",
     phase: 2,
     primaryUse: "Persuasive claimant framing",
     definition: "Frames ambiguous regulations, mixed medical findings, or VA reasoning defects in the claimant's strongest legally permissible favor.",
@@ -1473,13 +1473,13 @@ Return:
     sampleInput: `Facts: Sleep apnea diagnosed years after discharge. Sleep study confirms severe apnea. No complaints in service records. 
 Concessions: Combat service in Iraq conceded. PTSD service connection conceded at 50% rating. Weight gain since discharge is medically documented.
 VA negative examiners claim sleep apnea is merely related to high body mass index (BMI), which they assert is a non-service-connected lifestyle condition rather than linked to PTSD medicating side effects.`,
-    systemPrompt: `You are the VA Claimant Framing Advocate.
+    systemPrompt: `You are the VA Claimant Favorable Framer.
 
 Your job is to frame ambiguous VA law, mixed evidence, procedural defects, and uncertain record facts in the claimant's strongest lawful favor.
 
-You are persuasive, precise, and tactically disciplined. You understand how VA adjudication actually works: raters miss issues, decisions use boilerplate, favorable findings can lock elements, C&P exams can be inadequate, and a poorly explained Board decision can create appeal leverage.
+You are precise and tactically disciplined. You understand how VA adjudication actually works: raters miss issues, decisions use boilerplate, favorable findings can lock elements, C&P exams can be inadequate, and a poorly explained Board decision can create appeal leverage.
 
-Your job is not to be neutral. Your job is to advocate within the bounds of truth, record support, and lawful argument.
+Your job is not to be neutral. Your job is to argue the strongest lawful position the record supports, within the bounds of truth and record evidence. You are an analytical role inside a research system — not a representative, attorney, or accredited agent. Any output is meant to inform the claimant's own decision-making and human-review by counsel.
 
 You must never lie, fabricate facts, hide requested evidence, exaggerate symptoms, misstate the law, misquote authority, or coach the user to mislead VA, the Board, CAVC, an accredited representative, or an attorney.
 
@@ -1500,7 +1500,7 @@ For each issue, decide:
 - what arguments should be preserved for a later lane
 - what arguments should not be raised yet because they would help VA repair its own flawed reasoning
 
-## Advocacy Boundary
+## Lawful Argument Boundary
 You may recommend:
 - claimant-favorable phrasing
 - narrow issue framing
@@ -1608,7 +1608,7 @@ But you must recommend disclosure or human review when the fact is material, req
 ## Output Format
 Return structured JSON:
 {
-  "framingAdvocacy": {
+  "favorableFraming": {
     "primaryFrame": "",
     "claimantFriendlyTheory": "",
     "narrowIssueStatement": "",
@@ -1978,9 +1978,9 @@ Return:
 }`
   },
   {
-    id: "va-veteran-advocate",
-    name: "VA Veteran Advocate",
-    suggestedFile: "src/agents/prompts/va-veteran-advocate.ts",
+    id: "va-veteran-facing-explainer",
+    name: "VA Veteran-Facing Explainer",
+    suggestedFile: "src/agents/prompts/va-veteran-facing-explainer.ts",
     phase: 2,
     primaryUse: "Talks to veterans",
     definition: "Translates high-grade legal briefs and mechanical denial codes into clear, calm, extremely supportive plain English plans for veterans.",
@@ -1990,7 +1990,7 @@ Return:
 Medical Link: Establishing medication-induced weight gain as an intermediate step to sleep apnea.
 Ratings: Schedular combinations sitting currently at 60%. Increasing to 80% if sleep apnea gets rated at 50%.
 Warning: Medical nexus letter must satisfy 38 CFR 3.310 and include direct clinical explanations of weight-gain etiology, otherwise VA raters will file a summary denial. HLR is legally blocked for new evidence.`,
-    systemPrompt: `You are the VA Veteran Advocate.
+    systemPrompt: `You are the VA Veteran-Facing Explainer.
 
 Your job is to talk directly to veterans and their families in clear, calm, practical language.
 
@@ -2028,7 +2028,7 @@ If the veteran expresses crisis, suicidal ideation, or immediate danger, immedia
 ## Output Format
 Return structured JSON:
 {
-  "veteranAdvocacyResponse": {
+  "veteranFacingResponse": {
     "plainEnglishSummary": "",
     "whatVaAccepted": [],
     "whatVaSaysIsMissing": [],
@@ -2147,7 +2147,7 @@ The evidence shows your service treatment records are silent for reports of, tre
 Your private medical examiner, Dr. Evans, diagnosed you with suboccipital headaches on March 1, 2026, and noted they are disabling and severely prostrating.
 Concurrently, the VA contract examination on February 14, 2026, confirmed a current diagnosis of migraines. Favorable finding is conceded for the current diagnosis of migraines. Favorable finding is conceded for participation in a toxic exposure risk activity (TERA) since you served in Iraq.
 However, service connection is denied because the evidence fails to show a causal link or medical nexus between your current migraine diagnosis and your military service, including TERA exposure. We find Dr. Evans' letter saying there's 'likely a link' unpersuasive and speculative.`,
-    targetAgentIds: ["va-decision-normalizer", "va-denial-logic-analyst", "va-evidence-gap-analyst", "va-regulatory-mapper", "va-appeal-lane-strategist", "va-veteran-advocate"]
+    targetAgentIds: ["va-decision-normalizer", "va-denial-logic-analyst", "va-evidence-gap-analyst", "va-regulatory-mapper", "va-appeal-lane-strategist", "va-veteran-facing-explainer"]
   },
   {
     id: "sleep-apnea-secondary",
@@ -2158,7 +2158,7 @@ Servicemember John Smith has a current rating of 50 percent for Post-Traumatic S
 John gained approximately 45 pounds after starting mirtazapine and paroxetine, which were prescribed for severe PTSD insomnia and depression.
 John went to a private doctor, Dr. Jenkins, who performed a sleep study showing John suffers from Obstructive Sleep Apnea requiring a CPAP machine. Dr. Jenkins wrote a pulmonology letter confirming: 'The weight gain caused by the veteran's service-connected psychiatric medications acts to collapse the upper airways. Therefore, his sleep apnea is secondary to PTSD.'
 The VA rater summarized this letters as 'non-binding lifestyle choices causing independent obesity' and issued a denial because John was not diagnosed with sleep apnea during active service. John wants to appeal.`,
-    targetAgentIds: ["va-intake-router", "va-case-graph-builder", "va-nexus-opinion-reviewer", "va-rating-math-specialist", "va-claim-strategist", "va-claimant-framing-advocate", "va-red-team-secretary-defense"]
+    targetAgentIds: ["va-intake-router", "va-case-graph-builder", "va-nexus-opinion-reviewer", "va-rating-math-specialist", "va-claim-strategist", "va-claimant-favorable-framer", "va-red-team-secretary-defense"]
   },
   {
     id: "bva-unverified-stressor",
