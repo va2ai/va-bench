@@ -29,8 +29,8 @@ The agents are organized in two phases — Phase 1 deconstructors that normalize
 | 2 | `cavc-precedent-specialist` | Maps appellate CAVC and Federal Circuit doctrine relevant to the issue |
 | 2 | `cavc-brief-miner` | Pulls usable argument patterns from prior CAVC briefs and decisions |
 | 2 | `va-cavc-error-analyst` | Identifies CAVC-cognizable error in a Board decision (reasons-or-bases, Stegall, etc.) |
-| 2 | `va-knowledge-base-builder` | Builds a per-case reference pack of CFR sections, M21-1 cites, and BVA precedent |
-| 2 | `va-condition-specialist` | Deep-dives a specific condition's rating criteria and common denial patterns |
+| 1 | `va-synthesis-handoff-writer` | Compiles the full chain's outputs into the final research report for human review |
+| 2 | `va-research-expert` | Finds and ranks supporting authority across CFR, M21-1, BVA, and CAVC sources |
 | 2 | `va-veteran-facing-explainer` | Translates the technical output into clear, calm, plain-English next steps |
 
 ## Architecture
