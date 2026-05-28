@@ -1,62 +1,136 @@
 # va-bench
 
-**A 20-agent prompt catalog for VA legal-research support, with first-class hallucination control.**
+A 20-agent prompt catalog for VA legal-research support, with an interactive sandbox to run any single agent against the Gemini API and an export tool that bundles the catalog into a TypeScript module or JSON pack for use in another codebase.
 
-This repo is a working bench for a multi-agent system that deconstructs VA disability rating decisions, maps them to controlling 38 CFR authority, and produces structured handoff memos. Every agent has an explicit hard-rules section, a JSON output contract, and is gated by a separate **Citation & Authority Validator** agent that fails any unsupported citation before it reaches a user-facing report.
+The agents are organized in two phases — Phase 1 deconstructors that normalize a VA decision, identify denial logic, and map regulations; Phase 2 specialists that strategize lanes, analyze appellate doctrine, validate citations, and produce a veteran-facing plain-English summary. Three preset scenarios show how the prompts are intended to chain together end to end.
 
-## What it demonstrates
+> **Scope note.** This is a prompt-engineering catalog with a single-agent sandbox runtime, not a production multi-agent orchestrator. The orchestration is encoded in the prompts and the preset target-agent chains, not in server code. See [Limitations](#limitations) for the honest boundary on what this repo does and does not do.
+>
+> **Not legal advice.** Educational reference only. Output is intended to assist research by a licensed attorney or VA-accredited representative — it is not a substitute for one. The author is not an accredited VA representative or attorney.
 
-- **Multi-agent orchestration** — 20 specialist prompts split across two phases: Phase 1 deconstructors (intake routing, decision normalization, case-graph building, authority mapping, denial-logic analysis, evidence-gap analysis, nexus review, rating math, appeal-lane strategy) and Phase 2 specialists (CAVC error analysis, claim strategy synthesis, red-team adversarial review).
-- **Hallucination control as a system component** — citation validation is a discrete agent with PASS/WARN/FAIL semantics. BVA cannot be cited as binding; M21-1 cannot be cited as controlling law; unsupported citations are stripped from the safe-citation list rather than rewritten.
-- **Deterministic math kept out of the LLM** — combined-rating calculations, bilateral factor, TDIU schedular thresholds, and effective-date arithmetic are isolated in the Rating Math Specialist with hard rules forbidding LLM "estimation" when deterministic computation is available.
-- **Adversarial gating** — the Red Team / Secretary Defense agent runs before synthesis with explicit attack personas (rater, HLR reviewer, Board judge, examiner, Secretary's counsel) and severity grading (GREEN / YELLOW / RED). RED findings must specify the exact vulnerable claim, the attacker, the attack scenario, and the repair action — not vibes.
-- **Editable prompt UX** — every system prompt is inspectable, editable in-browser, and exportable to a typed TypeScript module or a versioned JSON manifest.
+## What's In the Catalog
 
-## Stack
+| Phase | Agent ID | Primary use |
+| ----- | -------- | ----------- |
+| 1 | `va-intake-router` | Routes the user's request to the correct VA workflow (Supplemental, HLR, Board, CAVC, etc.) |
+| 1 | `va-decision-normalizer` | Parses a rating decision or Board decision into structured findings, denial reasons, and conceded elements |
+| 1 | `va-case-graph-builder` | Builds a relational graph of issues, evidence, ratings, and procedural posture |
+| 1 | `va-denial-logic-analyst` | Identifies the precise denial logic VA used and its weak points |
+| 1 | `va-evidence-gap-analyst` | Maps the gap between the record and what the regulation requires |
+| 1 | `va-regulatory-mapper` | Maps the case to controlling CFR sections, M21-1 procedures, and statutory authority |
+| 2 | `va-claim-strategist` | Builds an end-to-end claim development strategy across lanes |
+| 2 | `va-appeal-lane-strategist` | Compares Supplemental / HLR / Board / CAVC tradeoffs for the specific posture |
+| 2 | `va-nexus-opinion-reviewer` | Critiques medical nexus opinions for probative weight and 38 CFR 3.310 alignment |
+| 2 | `va-rating-math-specialist` | Computes combined ratings and identifies SMC, TDIU, bilateral factor, and pyramiding issues |
+| 2 | `va-citation-authority-validator` | Reviews legal citations in generated output for accuracy and authority |
+| 2 | `va-red-team-secretary-defense` | Plays Secretary's counsel — finds the strongest VA counterargument to the claim |
+| 2 | `va-claimant-favorable-framer` | Frames ambiguous law and mixed evidence in the claimant's strongest lawful position |
+| 2 | `va-retired-cavc-judge` | Judicial devil's advocate — applies appellate reasoning to test the strategy |
+| 2 | `cavc-precedent-specialist` | Maps appellate CAVC and Federal Circuit doctrine relevant to the issue |
+| 2 | `cavc-brief-miner` | Pulls usable argument patterns from prior CAVC briefs and decisions |
+| 2 | `va-cavc-error-analyst` | Identifies CAVC-cognizable error in a Board decision (reasons-or-bases, Stegall, etc.) |
+| 2 | `va-knowledge-base-builder` | Builds a per-case reference pack of CFR sections, M21-1 cites, and BVA precedent |
+| 2 | `va-condition-specialist` | Deep-dives a specific condition's rating criteria and common denial patterns |
+| 2 | `va-veteran-facing-explainer` | Translates the technical output into clear, calm, plain-English next steps |
 
-- **Frontend** — React 19, TypeScript, Tailwind v4, Vite 6, lucide-react, motion
-- **Backend** — Express + Node, lazy `@google/genai` (Gemini) client, model switch between `gemini-3.5-flash` and `gemini-3.1-pro-preview`, low-temperature inference for analytical determinism
-- **Build** — Vite for client, esbuild for the server bundle, single-server deployment serving both the SPA and the `/api/run-agent` endpoint
+## Architecture
 
-## Run locally
+```
+                                  ┌──────────────────────────┐
+                                  │ Browser (React + Vite)   │
+                                  │  - Agent Catalog tab     │
+                                  │  - Sandbox Playground    │
+                                  │  - Export tab            │
+                                  └──────────┬───────────────┘
+                                             │ POST /api/run-agent
+                                             │ { agentId, systemPrompt,
+                                             │   inputText, useProModel }
+                                             ▼
+                                  ┌──────────────────────────┐
+                                  │ Express server (server.ts)│
+                                  │  - Lazy Gemini client     │
+                                  │  - Single agent execution │
+                                  └──────────┬───────────────┘
+                                             │
+                                             ▼
+                                  ┌──────────────────────────┐
+                                  │ Google Gemini API         │
+                                  │  - gemini-2.5-flash       │
+                                  │  - gemini-2.5-pro (opt-in)│
+                                  └──────────────────────────┘
+```
 
-**Prerequisites:** Node.js 20+, a Gemini API key from [aistudio.google.com](https://aistudio.google.com/app/apikey).
+Each preset scenario in `src/data/agents.ts` declares a `targetAgentIds` array — the prompts are written to compose, but the composition is currently caller-driven. A full orchestrator (chain runner, validator gating, red-team gating) is not implemented in the server — that is the next step, not what ships today.
+
+## Run Locally
+
+**Prerequisites:** Node.js ≥ 20, a Google Gemini API key from [aistudio.google.com](https://aistudio.google.com/apikey).
 
 ```bash
+git clone https://github.com/va2ai/va-bench.git
+cd va-bench
 npm install
-cp .env.example .env
-# edit .env and set GEMINI_API_KEY=...
+
+# Add your key
+echo "GEMINI_API_KEY=your-key-here" > .env
+
 npm run dev
+# Open http://localhost:3000
 ```
 
-Open `http://localhost:3000`. The Express server mounts Vite in middleware mode in dev and serves the built bundle in production (`npm run build && npm start`).
+The dev server runs Vite in middleware mode behind Express, so the React frontend and the `/api/run-agent` endpoint share one port. Set `PORT=3100` in `.env` to use a different port.
 
-## Repo layout
+## Sandbox Playground
 
-```
-server.ts                       # Express + Gemini proxy
-src/
-  App.tsx                       # Catalog / Playground / Export tabs
-  data/agents.ts                # 20 agent definitions (~2200 lines of prompts + sample inputs)
-  components/
-    AgentCard.tsx
-    Playground.tsx              # System-prompt editor + live execution
-    ExportPanel.tsx             # TS module + JSON manifest export
-  types.ts
-templates/                      # n/a
-```
+The Playground tab lets you:
 
-## Design notes
+* select any of the 20 agents from a dropdown
+* see the agent's system prompt, definition, sample input, and JSON output schema
+* edit the input and run it against Gemini 2.5 Flash (or toggle to Pro)
+* save the run output as a `.txt` report
 
-The 20 prompts are not a brainstorm — they're factored to mirror how a VA case actually fails. Most "AI agent" demos collapse into one mega-prompt that hallucinates citations. The split here is deliberate: extraction agents quote exact decision language; mapping agents rank authorities by weight; analysis agents read those extractions; synthesis only runs after the validator has stripped unsupported citations. The same pattern (extract → map → analyze → validate → synthesize, with hard rules at each layer) is what reliably brings hallucinated regulatory citations to near-zero in production legal-tech systems.
+A real network call goes out per run — the loading spinner reports the actual model being called, not a scripted timeline.
 
-This repo is one of several public artifacts behind that work. The production system using these patterns is [vaclaims.net](https://vaclaims.net).
+## Export
 
-## Author
+The Export tab compiles the entire catalog (or any user-edited subset) into:
 
-**Chris Combs** — Software engineer focused on multi-agent systems and hallucination control in regulated domains.
-[LinkedIn](https://www.linkedin.com/in/va2ai) · [GitHub](https://github.com/va2ai) · chris@vaclaims.net
+* a self-contained JSON pack (`va-bench-prompts-export.json`) with schema `va-bench-prompts-v1`
+* a TypeScript module suitable for dropping into another project
+
+Use this if you want to consume the prompts in your own application without depending on this repo's UI.
+
+## Design Notes
+
+The 20 prompts are factored to mirror how a VA case actually fails. Most "AI agent" demos collapse into one mega-prompt that hallucinates citations. The split here is deliberate: extraction agents quote exact decision language; mapping agents rank authorities by weight; analysis agents read those extractions; synthesis is meant to run only after a validator has stripped unsupported citations. The same pattern (extract → map → analyze → validate → synthesize, with hard rules at each layer) is what reliably brings hallucinated regulatory citations toward zero in production legal-tech systems — see the related [citation-validator](https://github.com/va2ai/citation-validator) repo for a worked example of the validator layer.
+
+## Limitations
+
+This repo is honest about what's missing — readers can rely on this list rather than digging.
+
+* **No multi-agent orchestrator.** `/api/run-agent` runs exactly one agent per request. The preset `targetAgentIds` chains are intended-flow metadata, not a runtime contract. Chaining must be done by the caller (or in a follow-up project).
+* **No runtime citation validator or red-team gate.** `va-citation-authority-validator` and `va-red-team-secretary-defense` exist as prompts, not as middleware that blocks downstream agents. Wiring them in is the obvious next step.
+* **Single sample size per preset.** Three preset scenarios cover migraines / sleep apnea secondary / BVA stressor denial. These exercise the prompts but are not a benchmark.
+* **No deployed live demo.** Requires a caller-supplied Gemini API key.
+* **No automated tests.** `npm run lint` runs `tsc --noEmit`. Adding agent-level snapshot or schema tests is open work.
+* **Model IDs are pinned to a known-stable family** (`gemini-2.5-flash` and `gemini-2.5-pro`). Swap to newer models in `server.ts` as they reach general availability.
+
+## What This Demonstrates
+
+* prompt engineering for a regulated, high-stakes domain (VA disability law)
+* explicit role decomposition for a multi-agent system (intake → normalization → analysis → strategy → critic → translation)
+* structured JSON output contracts for downstream programmatic use
+* a "red-team / devil's advocate / favorable-framing" trio as a critic pattern
+* an editable-prompt sandbox + export pipeline so the prompts are usable outside this repo
+* clean separation of educational tooling from representation — no role in this catalog claims to be a VA-accredited representative or attorney
+
+## Tech Stack
+
+* React 19, Vite 6, TypeScript 5.8, Tailwind CSS 4 — frontend
+* Express 4 + tsx — backend
+* `@google/genai` 2.x — Gemini SDK
+* esbuild — production server bundle
 
 ## License
 
-Apache-2.0.
+MIT — see [LICENSE](LICENSE).

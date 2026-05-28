@@ -1,10 +1,14 @@
 {
   "name": "va-bench",
-  "private": true,
   "version": "0.1.0",
-  "description": "20-agent prompt catalog for VA legal-research support with citation validation and red-team gating.",
-  "license": "Apache-2.0",
+  "description": "20-agent prompt catalog for multi-agent VA legal-research support — React + TypeScript + Vite + Express + Gemini. Includes interactive playground and export tooling.",
+  "license": "MIT",
+  "author": "Christopher Combs",
+  "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",

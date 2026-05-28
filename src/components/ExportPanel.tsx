@@ -75,7 +75,7 @@ ${promptText}
       systemPrompt: editedPrompts[agent.id] || agent.systemPrompt
     }));
     return JSON.stringify({
-      schema: "lavern-agent-pack-v1",
+      schema: "va-bench-prompts-v1",
       timestamp: new Date().toISOString(),
       agentCount: pack.length,
       agents: pack
@@ -97,7 +97,7 @@ ${promptText}
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "va-agent-pack-lavern-export.json";
+    link.download = "va-bench-prompts-export.json";
     link.click();
     URL.revokeObjectURL(url);
   };

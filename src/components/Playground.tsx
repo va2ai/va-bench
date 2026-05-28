@@ -170,7 +170,7 @@ export default function Playground({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `lavern-conversion-${currentAgent.id}-report.txt`;
+    link.download = `va-bench-${currentAgent.id}-report.txt`;
     link.click();
     URL.revokeObjectURL(url);
   };

@@ -15,16 +15,9 @@ const PORT = Number(process.env.PORT) || 3000;
 function getGeminiClient(): GoogleGenAI {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not defined. Set it in your .env file (see .env.example).");
+    throw new Error("GEMINI_API_KEY is not defined. Add it to .env in the project root and restart.");
   }
-  return new GoogleGenAI({
-    apiKey: apiKey,
-    httpOptions: {
-      headers: {
-        "User-Agent": "va-bench",
-      },
-    },
-  });
+  return new GoogleGenAI({ apiKey });
 }
 
 // 1. API Health Check
@@ -54,8 +47,9 @@ app.post("/api/run-agent", async (req, res) => {
       });
     }
 
-    // Select suitable model: gemini-3.5-flash of first preference, or gemini-3.1-pro-preview for pro
-    const modelToUse = useProModel ? "gemini-3.1-pro-preview" : "gemini-3.5-flash";
+    // Default to Gemini 2.5 family; toggle to Pro for harder reasoning.
+    // Swap these IDs as Google releases newer stable models.
+    const modelToUse = useProModel ? "gemini-2.5-pro" : "gemini-2.5-flash";
 
     console.log(`[Agent Hub] Running agent: ${agentName || agentId} utilizing model: ${modelToUse}...`);
 

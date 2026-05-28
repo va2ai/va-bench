@@ -76,7 +76,7 @@ export default function App() {
   });
 
   return (
-    <div id="lavern-portal-container" className="min-h-screen flex flex-col bg-slate-50/50">
+    <div id="va-bench-container" className="min-h-screen flex flex-col bg-slate-50/50">
       
       {/* PROFESSIONAL EXECUTIVE HEADER */}
       <nav className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-10 shadow-sm">
@@ -85,9 +85,9 @@ export default function App() {
             <Scale className="w-5 h-5 text-white" />
           </div>
           <div className="h-5 w-px bg-slate-200"></div>
-          <span className="text-xs sm:text-sm font-medium text-slate-500">Suite: Lavern Conversion</span>
+          <span className="text-xs sm:text-sm font-medium text-slate-500">va-bench</span>
           <span className="text-slate-300 hidden sm:inline">/</span>
-          <span className="text-xs sm:text-sm font-semibold text-slate-900 hidden sm:inline">VA_Legal_Intelligence_Roster</span>
+          <span className="text-xs sm:text-sm font-semibold text-slate-900 hidden sm:inline">VA Legal-Research Agent Catalog</span>
         </div>
 
         {/* Tab Navigation Bars */}
@@ -142,7 +142,7 @@ export default function App() {
             }}
             className="px-4 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg shadow-sm hover:bg-indigo-700 transition-all cursor-pointer"
           >
-            Deploy Deck
+            Export
           </button>
         </div>
       </nav>
@@ -153,11 +153,11 @@ export default function App() {
           <div className="flex items-center gap-2 text-slate-600 leading-relaxed font-sans">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
             <span>
-              <strong>Conversion Plan Verified:</strong> All 20 sovereign prompts are aligned, citation-checked, and editable right inside this workspace!
+              <strong>20 agent prompts</strong> for VA legal research — editable, runnable in the sandbox, exportable as JSON or a TypeScript bundle.
             </span>
           </div>
           <div className="flex items-center gap-2 font-mono text-[10px] text-indigo-700 font-semibold bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg shrink-0 w-fit">
-            <span>Roster Status: 20/20 Deployable</span>
+            <span>20 / 20 prompts</span>
           </div>
         </div>
       </section>
@@ -232,7 +232,7 @@ export default function App() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-xs text-[#475569] font-bold font-sans">
-                  Found <span className="text-slate-900">{filteredAgents.length}</span> of 20 sovereign agents
+                  Found <span className="text-slate-900">{filteredAgents.length}</span> of 20 agents
                 </span>
                 
                 {/* Reset filters helper link */}
@@ -414,15 +414,15 @@ export default function App() {
       <footer className="bg-slate-900 text-slate-400 border-t border-slate-800 text-xs py-10 px-6 shrink-0 mt-12">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
           <div className="space-y-1">
-            <p className="font-bold text-white text-xs">VA Legal Intelligence Portal</p>
+            <p className="font-bold text-white text-xs">va-bench</p>
             <p className="text-[11px] text-slate-500 leading-normal">
-              Educational reference agent pack compiled for the Lavern Conversion Suite. All prompts are source-checked.
+              Reference catalog of 20 prompts for a multi-agent VA legal-research pipeline. Educational use only — not legal advice and not legal representation.
             </p>
           </div>
           <div className="flex items-center gap-3 text-slate-500 text-[11px]">
-            <span>Version 1.0.0</span>
+            <span>MIT licensed</span>
             <span>•</span>
-            <span>Strict 38 CFR / Part 4 Alignment</span>
+            <a href="https://github.com/va2ai/va-bench" className="hover:text-slate-300">github.com/va2ai/va-bench</a>
           </div>
         </div>
       </footer>
